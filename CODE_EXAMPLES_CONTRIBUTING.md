@@ -36,9 +36,6 @@ All examples must demonstrate these scenarios:
 - ✅ MSE Time Type
 - ✅ UTC Time Type
 
-### Load File (api.v1.Propagator.LoadFile)
-- ✅ Load File
-
 ### Info (api.v1.Propagator.Info)
 - ✅ Info
 

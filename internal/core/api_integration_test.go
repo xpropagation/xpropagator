@@ -1441,37 +1441,6 @@ func TestAPI_Ephem_ContextCancellation(t *testing.T) {
 }
 
 // =============================================================================
-// LoadFile API Tests
-// =============================================================================
-
-func TestAPI_LoadFile_EmptyPath(t *testing.T) {
-	ts := newTestServer(t)
-	defer ts.close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	conn, err := ts.dial(ctx)
-	if err != nil {
-		t.Fatalf("Failed to dial: %v", err)
-	}
-	defer conn.Close()
-
-	client := apiv1.NewPropagatorClient(conn)
-
-	req := &apiv1.LoadFileRequest{
-		FilePath: "",
-	}
-
-	_, err = client.LoadFile(ctx, req)
-	if err == nil {
-		t.Error("Expected error for empty file path")
-	}
-
-	t.Logf("LoadFile with empty path correctly returned error: %v", err)
-}
-
-// =============================================================================
 // Error Handling Tests
 // =============================================================================
 
