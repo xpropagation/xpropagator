@@ -24,7 +24,6 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PropagatorClient interface {
 	Info(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*InfoResponse, error)
-	LoadFile(ctx context.Context, in *LoadFileRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Prop(ctx context.Context, in *PropRequest, opts ...grpc.CallOption) (*PropResponse, error)
 	Ephem(ctx context.Context, in *EphemRequest, opts ...grpc.CallOption) (Propagator_EphemClient, error)
 }
@@ -40,15 +39,6 @@ func NewPropagatorClient(cc grpc.ClientConnInterface) PropagatorClient {
 func (c *propagatorClient) Info(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*InfoResponse, error) {
 	out := new(InfoResponse)
 	err := c.cc.Invoke(ctx, "/api.v1.Propagator/Info", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *propagatorClient) LoadFile(ctx context.Context, in *LoadFileRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/api.v1.Propagator/LoadFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +91,6 @@ func (x *propagatorEphemClient) Recv() (*EphemResponse, error) {
 // for forward compatibility
 type PropagatorServer interface {
 	Info(context.Context, *emptypb.Empty) (*InfoResponse, error)
-	LoadFile(context.Context, *LoadFileRequest) (*emptypb.Empty, error)
 	Prop(context.Context, *PropRequest) (*PropResponse, error)
 	Ephem(*EphemRequest, Propagator_EphemServer) error
 	mustEmbedUnimplementedPropagatorServer()
@@ -113,9 +102,6 @@ type UnimplementedPropagatorServer struct {
 
 func (UnimplementedPropagatorServer) Info(context.Context, *emptypb.Empty) (*InfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Info not implemented")
-}
-func (UnimplementedPropagatorServer) LoadFile(context.Context, *LoadFileRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LoadFile not implemented")
 }
 func (UnimplementedPropagatorServer) Prop(context.Context, *PropRequest) (*PropResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Prop not implemented")
@@ -150,24 +136,6 @@ func _Propagator_Info_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PropagatorServer).Info(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Propagator_LoadFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoadFileRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PropagatorServer).LoadFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.v1.Propagator/LoadFile",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PropagatorServer).LoadFile(ctx, req.(*LoadFileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -221,10 +189,6 @@ var Propagator_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Info",
 			Handler:    _Propagator_Info_Handler,
-		},
-		{
-			MethodName: "LoadFile",
-			Handler:    _Propagator_LoadFile_Handler,
 		},
 		{
 			MethodName: "Prop",
