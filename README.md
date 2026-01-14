@@ -17,6 +17,7 @@
 - [Docker](#docker)
   - [Linux AMD64](#linux-amd64)
   - [Linux ARM](#linux-arm)
+- [Roadmap](#roadmap)
 ---
 
 ## Overview
@@ -749,6 +750,16 @@ docker rm xpropagator-server
 rm -rf ./certs
 ./build_and_run_docker_linux.sh /{SGP4 ROOT}/Lib/Linux_ARM/GFORTRAN /{SGP4 ROOT}/SampleCode/Go/DriverExamples/wrappers
 ```
+
+---
+
+## Roadmap
+
+Future improvements (contributions welcome!):
+
+- [ ] **REST HTTP Gateway** — Implement REST/JSON API gateway (only if there is demand from users)
+- [ ] **More Language Examples** — Add code examples in Rust, C++, MATLAB, and other languages
+- [ ] **Extended Test Coverage** — Write more unit tests for edge cases and error handling
 
 ---
 
