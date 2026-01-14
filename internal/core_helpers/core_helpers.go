@@ -36,7 +36,7 @@ import (
 	"sync/atomic"
 )
 
-var satLocks sync.Map // satKey -> *sync.RWMutex
+var satLocks sync.Map
 
 func RwFor(key int64) *sync.RWMutex {
 	v, _ := satLocks.LoadOrStore(key, &sync.RWMutex{})
@@ -55,12 +55,11 @@ var (
 )
 
 var (
-	curGate atomic.Value // *gate
+	curGate atomic.Value
 )
 
 type gate struct{ ch chan struct{} }
 
-// вызывать один раз при старте процесса (или перед первым RPC)
 func SetDllGate(n int) {
 	if n < 1 {
 		n = 1

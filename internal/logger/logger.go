@@ -34,7 +34,6 @@ var Module = fx.Module("logger",
 	fx.Provide(NewLogger),
 )
 
-// NewLogger создает production-ready zap logger с кастомным time encoder
 func NewLogger() (*zap.Logger, error) {
 	cfg := zap.NewProductionConfig()
 	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder

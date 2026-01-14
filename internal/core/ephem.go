@@ -40,7 +40,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// NewPropagatorService creates a new PropagatorService with all dependencies injected
 func NewPropagatorService(cfg *config.Config, logger *zap.Logger, satGC *gc.GC) *PropagationService {
 	logger.Info("PropagatorService initialized")
 	return &PropagationService{
@@ -52,12 +51,12 @@ func NewPropagatorService(cfg *config.Config, logger *zap.Logger, satGC *gc.GC) 
 
 func UtcToDS50(t time.Time) float64 {
 	t = t.UTC()
-	ref := time.Date(1950, 1, 1, 12, 0, 0, 0, time.UTC) // DS50=0
+	ref := time.Date(1950, 1, 1, 12, 0, 0, 0, time.UTC)
 	return t.Sub(ref).Seconds() / 86400.0
 }
 
 func DS50ToUtc(ds50 float64) time.Time {
-	ref := time.Date(1950, 1, 1, 12, 0, 0, 0, time.UTC) // DS50=0
+	ref := time.Date(1950, 1, 1, 12, 0, 0, 0, time.UTC)
 	return ref.Add(time.Duration(ds50 * 86400.0 * float64(time.Second)))
 }
 
@@ -181,12 +180,10 @@ func getKnownTimeStep(grid *apiv1.EphemTimeGrid) float64 {
 		}
 
 		step := dur.ToTimeDuration().Minutes()
-		//ds50Step := stepSeconds / 86400               // 0.0013888889
 
 		return step
-
-		//return UtcToDS50(t.KnownTimeStepPeriod()) * 1440
 	}
+
 	t2, ok2 := grid.TimeStepType.(*apiv1.EphemTimeGrid_KnownTimeStepDs50)
 	if ok2 {
 		return t2.KnownTimeStepDs50 * 1440

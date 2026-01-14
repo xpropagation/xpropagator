@@ -235,5 +235,3 @@ func main() {
 
 	app.Run()
 }
-
-// Remove fucking WarmedUpTask

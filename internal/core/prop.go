@@ -40,7 +40,6 @@ import (
 )
 
 func (propSrv *PropagationService) Prop(ctx context.Context, req *apiv1.PropRequest) (*apiv1.PropResponse, error) {
-	// TODO do we need to lock always, so we get rid of parallel requests ? or only for stateless mode?
 	globMu.Lock()
 	defer globMu.Unlock()
 
