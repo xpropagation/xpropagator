@@ -1,0 +1,380 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2026 Roman Bielyi
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.google.protobuf' version '0.9.4'
+}
+
+group = 'com.xpropagation'
+version = '1.0.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+repositories {
+    mavenCentral()
+}
+
+// gRPC and Protobuf versions
+def grpcVersion = '1.60.0'
+def protobufVersion = '3.25.1'
+
+dependencies {
+    // gRPC dependencies
+    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+
+    // Protobuf runtime
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+
+    // Annotation processing for gRPC
+    compileOnly "org.apache.tomcat:annotations-api:6.0.53"
+
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Protobuf configuration
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {}
+            }
+            task.plugins {
+                grpc {}
+            }
+        }
+    }
+}
+
+// Source sets configuration
+sourceSets {
+    main {
+        java {
+            // Example source files
+            srcDirs 'info', 'helper', 'single_propagate', 'generate_ephemeris'
+            // Generated proto classes
+            srcDirs 'build/generated/source/proto/main/java'
+            srcDirs 'build/generated/source/proto/main/grpc'
+        }
+        proto {
+            srcDir 'src/main/proto'
+        }
+        resources {
+            // Exclude proto directory from resources
+            exclude 'src/main/proto/**'
+        }
+    }
+}
+
+// Application configuration for running examples
+application {
+    mainClass = 'secure.InfoSecure'
+}
+
+// Task to run the insecure Info example
+tasks.register('runInfoInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the Info example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'insecure.InfoInsecure'
+}
+
+// Task to run the secure Info example
+tasks.register('runInfoSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the Info example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'secure.InfoSecure'
+}
+
+// ============================================
+// Single Propagate DS50 examples
+// ============================================
+
+// Task to run the insecure SinglePropagateDs50 example
+tasks.register('runSinglePropagateDs50TimeTypeInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the SinglePropagate DS50 example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'single_propagate.insecure.SinglePropagateDs50Insecure'
+}
+
+// Task to run the secure SinglePropagateDs50 example
+tasks.register('runSinglePropagateDs50TimeTypeSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the SinglePropagate DS50 example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'single_propagate.secure.SinglePropagateDs50Secure'
+}
+
+// ============================================
+// Single Propagate MSE examples
+// ============================================
+
+// Task to run the insecure SinglePropagateMse example
+tasks.register('runSinglePropagateMseTimeTypeInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the SinglePropagate MSE example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'single_propagate.insecure.SinglePropagateMseInsecure'
+}
+
+// Task to run the secure SinglePropagateMse example
+tasks.register('runSinglePropagateMseTimeTypeSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the SinglePropagate MSE example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'single_propagate.secure.SinglePropagateMseSecure'
+}
+
+// ============================================
+// Single Propagate UTC examples
+// ============================================
+
+// Task to run the insecure SinglePropagateUtc example
+tasks.register('runSinglePropagateUtcTimeTypeInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the SinglePropagate UTC example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'single_propagate.insecure.SinglePropagateUtcInsecure'
+}
+
+// Task to run the secure SinglePropagateUtc example
+tasks.register('runSinglePropagateUtcTimeTypeSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the SinglePropagate UTC example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'single_propagate.secure.SinglePropagateUtcSecure'
+}
+
+// ============================================
+// Generate Ephemeris - Common Time Grid examples
+// ============================================
+
+// Task to run the insecure GenerateEphemerisCommonTimeGrid example
+tasks.register('runGenerateEphemerisCommonTimeGridInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris CommonTimeGrid example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.insecure.GenerateEphemerisCommonTimeGridInsecure'
+}
+
+// Task to run the secure GenerateEphemerisCommonTimeGrid example
+tasks.register('runGenerateEphemerisCommonTimeGridSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris CommonTimeGrid example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.secure.GenerateEphemerisCommonTimeGridSecure'
+}
+
+// ============================================
+// Generate Ephemeris - Mixed Time Grid examples
+// ============================================
+
+// Task to run the insecure GenerateEphemerisMixedTimeGrid example
+tasks.register('runGenerateEphemerisMixedTimeGridInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris MixedTimeGrid example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.insecure.GenerateEphemerisMixedTimeGridInsecure'
+}
+
+// Task to run the secure GenerateEphemerisMixedTimeGrid example
+tasks.register('runGenerateEphemerisMixedTimeGridSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris MixedTimeGrid example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.secure.GenerateEphemerisMixedTimeGridSecure'
+}
+
+// ============================================
+// Generate Ephemeris - Known Time Step UTC examples
+// ============================================
+
+// Task to run the insecure GenerateEphemerisKnownTimeStepUtc example
+tasks.register('runGenerateEphemerisKnownTimeStepUtcInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris KnownTimeStepUtc example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.insecure.GenerateEphemerisKnownTimeStepUtcInsecure'
+}
+
+// Task to run the secure GenerateEphemerisKnownTimeStepUtc example
+tasks.register('runGenerateEphemerisKnownTimeStepUtcSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris KnownTimeStepUtc example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.secure.GenerateEphemerisKnownTimeStepUtcSecure'
+}
+
+// ============================================
+// Generate Ephemeris - Known Time Step DS50 examples
+// ============================================
+
+// Task to run the insecure GenerateEphemerisKnownTimeStepDs50 example
+tasks.register('runGenerateEphemerisKnownTimeStepDs50Insecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris KnownTimeStepDs50 example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.insecure.GenerateEphemerisKnownTimeStepDs50Insecure'
+}
+
+// Task to run the secure GenerateEphemerisKnownTimeStepDs50 example
+tasks.register('runGenerateEphemerisKnownTimeStepDs50Secure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris KnownTimeStepDs50 example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.secure.GenerateEphemerisKnownTimeStepDs50Secure'
+}
+
+// ============================================
+// Generate Ephemeris - J2K Frame examples
+// ============================================
+
+// Task to run the insecure GenerateEphemerisJ2kFrame example
+tasks.register('runGenerateEphemerisJ2kFrameInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris J2K Frame example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.insecure.GenerateEphemerisJ2kFrameInsecure'
+}
+
+// Task to run the secure GenerateEphemerisJ2kFrame example
+tasks.register('runGenerateEphemerisJ2kFrameSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris J2K Frame example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.secure.GenerateEphemerisJ2kFrameSecure'
+}
+
+// ============================================
+// Generate Ephemeris - ECI Frame examples
+// ============================================
+
+// Task to run the insecure GenerateEphemerisEciFrame example
+tasks.register('runGenerateEphemerisEciFrameInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris ECI Frame example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.insecure.GenerateEphemerisEciFrameInsecure'
+}
+
+// Task to run the secure GenerateEphemerisEciFrame example
+tasks.register('runGenerateEphemerisEciFrameSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris ECI Frame example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.secure.GenerateEphemerisEciFrameSecure'
+}
+
+// ============================================
+// Generate Ephemeris - DS50 Time Type examples
+// ============================================
+
+// Task to run the insecure GenerateEphemerisDs50TimeType example
+tasks.register('runGenerateEphemerisDs50TimeTypeInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris DS50 Time Type example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.insecure.GenerateEphemerisDs50TimeTypeInsecure'
+}
+
+// Task to run the secure GenerateEphemerisDs50TimeType example
+tasks.register('runGenerateEphemerisDs50TimeTypeSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris DS50 Time Type example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.secure.GenerateEphemerisDs50TimeTypeSecure'
+}
+
+// ============================================
+// Generate Ephemeris - UTC Time Type examples
+// ============================================
+
+// Task to run the insecure GenerateEphemerisUtcTimeType example
+tasks.register('runGenerateEphemerisUtcTimeTypeInsecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris UTC Time Type example with insecure connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.insecure.GenerateEphemerisUtcTimeTypeInsecure'
+}
+
+// Task to run the secure GenerateEphemerisUtcTimeType example
+tasks.register('runGenerateEphemerisUtcTimeTypeSecure', JavaExec) {
+    group = 'application'
+    description = 'Run the GenerateEphemeris UTC Time Type example with mTLS'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'generate_ephemeris.secure.GenerateEphemerisUtcTimeTypeSecure'
+}
+
+// Copy proto files from project root to local proto directory
+tasks.register('copyProtos', Copy) {
+    from("${projectDir}/../../../api") {
+        include '**/*.proto'
+        exclude '**/gen/**'
+    }
+    into 'src/main/proto/api'
+}
+
+// Task to remove copied protos after build (including empty parent dirs)
+tasks.register('cleanProtos', Delete) {
+    delete 'src'
+}
+
+// Ensure protos are copied before generating and processing
+tasks.named('generateProto') {
+    dependsOn 'copyProtos'
+    finalizedBy 'cleanProtos'
+}
+
+tasks.named('processResources') {
+    dependsOn 'copyProtos'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Clean generated sources
+clean {
+    delete 'src/main/proto'
+}

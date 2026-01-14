@@ -1,0 +1,13 @@
+reflection: false
+stream_chunk_size: 3
+graceful_stop_timeout_sec: 10s
+gc:
+  max_loaded_sats_gc: 100
+  idle_ttl_gc_min: 10m
+  sweep_interval_gc_min: 5m
+tls:
+  enabled: false
+  cert_file: "certs/server.crt"
+  key_file: "certs/server.key"
+  ca_file: "certs/ca.crt"
+
