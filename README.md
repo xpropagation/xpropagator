@@ -626,9 +626,9 @@ XPropagator includes a test suite covering configuration, garbage collection, an
 
 | Script | Description | DLL Required |
 |--------|-------------|--------------|
-| `scripts/run_unit_tests_config.sh` | Runs config package unit tests | ❌ No |
-| `scripts/run_unit_tests_gc.sh` | Runs GC package unit tests | ✅ Yes |
-| `scripts/run_integration_tests_core.sh` | Runs core API integration tests | ✅ Yes |
+| `scripts/run_unit_tests_config.sh` | Runs config package unit tests |  No |
+| `scripts/run_unit_tests_gc.sh` | Runs GC package unit tests |  Yes |
+| `scripts/run_integration_tests_core.sh` | Runs core API integration tests |  Yes |
 
 ### Test Coverage
 
