@@ -23,7 +23,7 @@
 ## Overview
 
 **XPropagator**  
- Satellite orbit propagation gRPC service, offering an for the U.S. Space Force (USSF) SGP4/SGP4-XP implementation. Written in Go/Cgo.    
+ Satellite orbit propagation gRPC service, offering an API for the U.S. Space Force (USSF) SGP4/SGP4-XP implementation. Written in Go/Cgo.    
 
 - **Configurable server-side streaming**  
   Streamed gRPC responses for real-time propagation results or massive ephemeris datasets.
