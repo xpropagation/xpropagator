@@ -22,30 +22,13 @@
 
 ## Overview
 
-<img src="assets/logo.png" alt="logo" width="210" height="210">
-
-<div align="center">
-
-[![Go](https://img.shields.io/badge/Go-1.23-blue.svg)](https://golang.org)
-[![gRPC](https://img.shields.io/badge/gRPC-v1.75-blue.svg)](https://grpc.io)
-[![Docker](https://img.shields.io/badge/Docker-Linux%20AMD64%20%7C%20ARM-blue.svg)](https://hub.docker.com)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)]()
-[![mTLS](https://img.shields.io/badge/Security-mTLS%20enabled-orange.svg)]()
-[![SGP4](https://img.shields.io/badge/Propagator-SGP4|SGP4%20XP%20by%20USSF-violet.svg)](https://www.space-track.org)
-
-</div>
-
 **XPropagator**  
-A modern satellite orbit propagation service, a building block for Space Situational Awareness (SSA) pipelines, offering a powerful gRPC API for the ultra-precise 🇺🇸 U.S. Space Force (USSF) SGP4/SGP4-XP implementation (**de facto industry standard**). Written in Go/Cgo.    
-It offers:
-
-- **Catalog-scale processing**  
-  Propagate thousands of satellites with flexible API.
+ Satellite orbit propagation gRPC service, offering an for the U.S. Space Force (USSF) SGP4/SGP4-XP implementation. Written in Go/Cgo.    
 
 - **Configurable server-side streaming**  
   Streamed gRPC responses for real-time propagation results or massive ephemeris datasets.
 
-- **Flexible ephemeris generation**  
+- **Ephemeris generation**  
   Single satellite propagation or large-scale ephemeris generation.
 
 - **Mutual TLS security**  
@@ -54,7 +37,6 @@ It offers:
 - **Automatic resource management**  
   Built-in resource garbage collection eliminates manual tuning for production workloads.
 
-- **Ultra precision**: U.S. Space Force (USSF) developed ultra-precised **de facto industry standard** SGP4/SGP4-XP implementation.
 
 | Aspect                 | Vallado SGP4 (Open-Source)                                                                                  | USSF SGP4-XP                                                                                                                                                                          |
 |------------------------|-------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -107,12 +89,12 @@ It offers:
 
 | Aspect              | **gRPC, HTTP/2 (Current)**         | **REST, HTTP/1.1**               |
 |---------------------|------------------------------------|----------------------------------|
-| **Target Audience** | **SSA engineers, microservices** ✅ | Web developers ❌                 |
-| **Ephem Streaming** | **Native, perfect** ✅              | **JSON chunks = nightmare** ❌    |
-| **Payload Size**    | Protobuf = **10x smaller** ✅       | JSON = **gigabytes ephemeris** ❌ |
-| **Performance**     | **HTTP/2 + multiplexing** ✅        | HTTP/1.1 = **queuing** ❌         |
-| **Security**        | **mTLS end-to-end** ✅              | **TLS + JWT hack** ❌             |
-| **Integration**     | **Go/Python/C++/MATLAB** ✅         | **curl/JS/Postman** ❌            |
+| **Target Audience** | **SSA engineers, microservices**   | Web developers                   |
+| **Ephem Streaming** | **Native**                         | **JSON chunks = nightmare**       |
+| **Payload Size**    | Protobuf = **10x smaller**         | JSON = **gigabytes ephemeris**    |
+| **Performance**     | **HTTP/2 + multiplexing**          | HTTP/1.1 = **queuing**            |
+| **Security**        | **mTLS end-to-end**                | **TLS + JWT hack**                |
+| **Integration**     | **Go/Python/C++/MATLAB**           | **curl/JS/Postman**               |
 
 
 ## Examples
@@ -167,7 +149,7 @@ grpcurl -plaintext -d '{
 }' localhost:50051 api.v1.Propagator.Prop
 ```
 
-Response (output of the 🇺🇸USSF SGP4 implementation)
+Response
 ```json
 {
   "reqId": "1",
@@ -288,7 +270,7 @@ grpcurl -plaintext -d '{
 }' localhost:50051 api.v1.Propagator.Ephem
 ```
 
-Response (output of the 🇺🇸USSF SGP4 implementation)
+Response
 
 // ... the rest of ephemeris data
 ```json
@@ -554,10 +536,7 @@ Client 4:          ░░ WAIT ░░░░░░░░░░░░░░░░�
 
 - **Throughput**: Limited to one DLL call at a time
 - **Latency**: Wait time = sum of all preceding request durations
-- **Scaling**: For high-throughput scenarios, deploy multiple XPropagator instances behind a load balancer
-
-> [!NOTE]
-> Waiting requests consume minimal resources (~2KB stack per goroutine, near-zero CPU).
+- **Scaling**: For high-throughput scenarios, deploy multiple XPropagator instances behind a load balancer.
 
 ## TLS
 To enable end-to-end strong TLS encryption with mutual certificate authentication (mTLS) between client and server, configure the TLS settings in your service configuration as shown below:
@@ -766,14 +745,6 @@ Future improvements (contributions welcome!):
 ## Contributing
 
 Contributions are welcome! Whether it's bug fixes, new features, documentation improvements, or code examples in new languages — all PRs are appreciated.
-
-### How to Contribute
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
 
 ### Contribution Ideas
 
