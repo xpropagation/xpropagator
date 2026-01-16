@@ -737,6 +737,7 @@ rm -rf ./certs
 Future improvements (contributions welcome!):
 
 - [ ] **REST HTTP Gateway** — Implement REST/JSON API gateway (only if there is demand from users)
+- [ ] **Benchmarks** - Write Vallado SGP4 vs USSF SGP4 vs USSF SGP4-XP benchmarks
 - [ ] **More Language Examples** — Add code examples in Rust, C++, MATLAB, and other languages
 - [ ] **Extended Test Coverage** — Write more unit tests for edge cases and error handling
 
