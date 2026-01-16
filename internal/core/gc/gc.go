@@ -118,13 +118,9 @@ func (g *GC) Close() {
 }
 
 func (g *GC) addTLE(ctx context.Context, ln1, ln2 string) (int64, error) {
-	if len(ln1) < 7 {
-		return 0, fmt.Errorf("invalid TLE first line length")
-	}
-	satStr := strings.TrimSpace(ln1[2:7])
-	satNum, err := strconv.Atoi(satStr)
+	satNum, err := parseSatNum(ln1)
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse satellite number from TLE first line: %v", err)
+		return 0, fmt.Errorf("failed to parse satellite number from TLE first line: %w", err)
 	}
 
 	var existing int64
@@ -383,9 +379,35 @@ func parseSatNum(l1 string) (int32, error) {
 		return 0, fmt.Errorf("invalid TLE first line length")
 	}
 	s := strings.TrimSpace(l1[2:7])
-	n, err := strconv.Atoi(s)
-	if err != nil {
-		return 0, fmt.Errorf("parse satNum: %w", err)
+	if len(s) != 5 {
+		return 0, fmt.Errorf("invalid satnum length: %s", s)
 	}
-	return int32(n), nil
+
+	// Try numeric first (legacy 5-digit)
+	if n, err := strconv.Atoi(s); err == nil {
+		if n >= 1 && n <= 99999 {
+			return int32(n), nil
+		}
+	}
+
+	// Alpha-5 parsing: Letter (A-Z except I,O) + 4 digits
+	if len(s) == 5 {
+		letter := s[0]
+		digits := s[1:]
+
+		// Validate letter (A-Z excluding I,O per USSF spec)
+		if letter >= 'A' && letter <= 'Z' && letter != 'I' && letter != 'O' {
+			num, err := strconv.Atoi(digits)
+			if err == nil && num >= 0 && num <= 9999 {
+				// A=10, B=11, ..., Z=35
+				prefix := int(letter-'A'+10) * 10000
+				satnum := prefix + num
+				if satnum >= 100000 && satnum <= 359999 { // Valid Alpha-5 range
+					return int32(satnum), nil
+				}
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("parse satNum: invalid format %q", s)
 }
