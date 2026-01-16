@@ -572,7 +572,7 @@ func TestGC_SweepInterval_SweeperRuns(t *testing.T) {
 	// This test mainly verifies the sweeper goroutine runs without panic
 }
 
-func TestParseSatNum_Valid(t *testing.T) {
+func TestParseSatNum_Valid_Numeric(t *testing.T) {
 	tests := []struct {
 		name     string
 		tle1     string
@@ -592,6 +592,117 @@ func TestParseSatNum_Valid(t *testing.T) {
 			name:     "Max 5 digit",
 			tle1:     "1 99999U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
 			expected: 99999,
+		},
+		{
+			name:     "Min value 1",
+			tle1:     "1 00001U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 1,
+		},
+		{
+			name:     "Mid range",
+			tle1:     "1 50000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 50000,
+		},
+		{
+			name:     "X-37B OTV-8",
+			tle1:     "1 65271U 25183A   25282.36302114 0.00010000  00000-0  55866-4 0    07",
+			expected: 65271,
+		},
+		{
+			name:     "HELIOS 1A",
+			tle1:     "1 23605U 95033A   26006.14103603  .00004682  00000-0  33679-3 0  9999",
+			expected: 23605,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := parseSatNum(tt.tle1)
+			if err != nil {
+				t.Errorf("parseSatNum() error = %v", err)
+				return
+			}
+			if result != tt.expected {
+				t.Errorf("parseSatNum() = %d, want %d", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestParseSatNum_Valid_Alpha5(t *testing.T) {
+	// Alpha-5 format: Letter (A-Z except I,O) + 4 digits
+	// Conversion: (letter - 'A' + 10) * 10000 + digits
+	// A0000 = 100000, A0001 = 100001, ..., A9999 = 109999
+	// B0000 = 110000, ..., Z9999 = 359999
+	tests := []struct {
+		name     string
+		tle1     string
+		expected int32
+	}{
+		{
+			name:     "Alpha-5 A0000 (minimum A)",
+			tle1:     "1 A0000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 100000, // (0+10)*10000 + 0
+		},
+		{
+			name:     "Alpha-5 A0001",
+			tle1:     "1 A0001U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 100001,
+		},
+		{
+			name:     "Alpha-5 A9999 (maximum A)",
+			tle1:     "1 A9999U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 109999,
+		},
+		{
+			name:     "Alpha-5 B0000",
+			tle1:     "1 B0000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 110000, // (1+10)*10000 + 0
+		},
+		{
+			name:     "Alpha-5 B1234",
+			tle1:     "1 B1234U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 111234,
+		},
+		{
+			name:     "Alpha-5 C5678",
+			tle1:     "1 C5678U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 125678, // (2+10)*10000 + 5678
+		},
+		{
+			name:     "Alpha-5 H0000 (before I gap)",
+			tle1:     "1 H0000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 170000, // (7+10)*10000 + 0
+		},
+		{
+			name:     "Alpha-5 J0000 (after I gap, I is skipped)",
+			tle1:     "1 J0000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 190000, // (9+10)*10000 + 0
+		},
+		{
+			name:     "Alpha-5 N0000 (before O gap)",
+			tle1:     "1 N0000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 230000, // (13+10)*10000 + 0
+		},
+		{
+			name:     "Alpha-5 P0000 (after O gap, O is skipped)",
+			tle1:     "1 P0000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 250000, // (15+10)*10000 + 0
+		},
+		{
+			name:     "Alpha-5 Z0000",
+			tle1:     "1 Z0000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 350000, // (25+10)*10000 + 0
+		},
+		{
+			name:     "Alpha-5 Z9999 (maximum possible)",
+			tle1:     "1 Z9999U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 359999,
+		},
+		{
+			name:     "Alpha-5 with typical object",
+			tle1:     "1 A1234U 21001A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected: 101234,
 		},
 	}
 
@@ -623,8 +734,44 @@ func TestParseSatNum_Invalid(t *testing.T) {
 			tle1: "",
 		},
 		{
-			name: "Non-numeric",
+			name: "Non-numeric all letters",
 			tle1: "1 ABCDE 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+		},
+		{
+			name: "Numeric zero",
+			tle1: "1 00000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+		},
+		{
+			name: "Alpha-5 with letter I (invalid - I is excluded)",
+			tle1: "1 I0001U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+		},
+		{
+			name: "Alpha-5 with letter O (invalid - O is excluded)",
+			tle1: "1 O0001U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+		},
+		{
+			name: "Alpha-5 lowercase letter",
+			tle1: "1 a0001U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+		},
+		{
+			name: "Alpha-5 with non-digit suffix",
+			tle1: "1 AABC1U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+		},
+		{
+			name: "Only 4 characters",
+			tle1: "1 1234  98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+		},
+		{
+			name: "Special characters",
+			tle1: "1 @#$%^U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+		},
+		{
+			name: "Whitespace in satnum",
+			tle1: "1  2544U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+		},
+		{
+			name: "Negative number representation",
+			tle1: "1 -1234U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
 		},
 	}
 
@@ -632,7 +779,66 @@ func TestParseSatNum_Invalid(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := parseSatNum(tt.tle1)
 			if err == nil {
-				t.Error("parseSatNum() expected error, got nil")
+				t.Errorf("parseSatNum(%q) expected error, got nil", tt.tle1)
+			}
+		})
+	}
+}
+
+func TestParseSatNum_EdgeCases(t *testing.T) {
+	tests := []struct {
+		name        string
+		tle1        string
+		expected    int32
+		shouldError bool
+	}{
+		{
+			name:        "Exactly 7 characters minimum",
+			tle1:        "1 12345",
+			expected:    12345,
+			shouldError: false,
+		},
+		{
+			name:        "Boundary: 99999 (max numeric)",
+			tle1:        "1 99999U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected:    99999,
+			shouldError: false,
+		},
+		{
+			name:        "Boundary: A0000 (min Alpha-5)",
+			tle1:        "1 A0000U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected:    100000,
+			shouldError: false,
+		},
+		{
+			name:        "Boundary: Z9999 (max Alpha-5)",
+			tle1:        "1 Z9999U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected:    359999,
+			shouldError: false,
+		},
+		{
+			name:        "Real TLE with spaces preserved",
+			tle1:        "1 25544U 98067A   21275.52543210  .00016717  00000-0  10270-3 0  9042",
+			expected:    25544,
+			shouldError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := parseSatNum(tt.tle1)
+			if tt.shouldError {
+				if err == nil {
+					t.Errorf("parseSatNum() expected error, got result=%d", result)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("parseSatNum() unexpected error = %v", err)
+					return
+				}
+				if result != tt.expected {
+					t.Errorf("parseSatNum() = %d, want %d", result, tt.expected)
+				}
 			}
 		})
 	}
