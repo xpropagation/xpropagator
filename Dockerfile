@@ -13,7 +13,7 @@ COPY . .
 RUN go mod download
 
 # Build metadata
-ARG VERSION=v1.0.0
+ARG VERSION
 ARG COMMIT
 ARG BUILD
 

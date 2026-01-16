@@ -110,17 +110,20 @@ done
 
 COMMIT=$(git rev-parse HEAD)
 BUILD=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+VERSION=$(git describe --tags --abbrev=0 $(git rev-list --tags --max-count=1))
 
 echo ">>> Building image with tag xpropagator-server:${TAG} ..."
 echo "    TLS enabled: ${TLS_ENABLED}"
 echo "    Commit: ${COMMIT}"
 echo "    Build:  ${BUILD}"
+echo "    Version: ${VERSION}"
 
 docker buildx build \
   --progress=plain \
   --load \
   --build-arg COMMIT="${COMMIT}" \
   --build-arg BUILD="${BUILD}" \
+  --build-arg VERSION="${VERSION}" \
   --build-arg SGP4_LIB_PATH="${SGP4_LIB_PATH}" \
   --no-cache \
   -t xpropagator-server:${TAG} ../. 2>&1
